@@ -1,101 +1,121 @@
+"use server"; // This is a client component 👈🏽
 import Image from "next/image";
+import logo from "@/app/assets/libertoe-logo-A.png";
+import testShoe from "@/app/assets/testShoe.jpg";
+import { getHesabfaProducts, getHesabfaQuantity } from "@/app/lib/netcall";
+// import { useState } from "react";
+import HomePage from "@/app/components/mainPage";
+import { useSearchParams } from "next/navigation";
+import { quantityCleaner } from "./lib/dataCleaner";
 
-export default function Home() {
+const dummyCounts = [
+  {
+    size: "35",
+    isAvailable: false,
+  },
+  {
+    size: "36",
+    isAvailable: true,
+  },
+  {
+    size: "37",
+    isAvailable: true,
+  },
+  {
+    size: "38",
+    isAvailable: false,
+  },
+  {
+    size: "39",
+    isAvailable: false,
+  },
+  {
+    size: "40",
+    isAvailable: true,
+  },
+  {
+    size: "41",
+    isAvailable: false,
+  },
+  {
+    size: "42",
+    isAvailable: false,
+  },
+  {
+    size: "43",
+    isAvailable: false,
+  },
+  {
+    size: "44",
+    isAvailable: true,
+  },
+  {
+    size: "45",
+    isAvailable: true,
+  },
+  {
+    size: "46",
+    isAvailable: true,
+  },
+];
+
+const branches = [
+  {
+    name: "هروی",
+    id: "heravi",
+    warehouseCode: "11",
+  },
+  {
+    name: "پالادیوم",
+    id: "paladium",
+    warehouseCode: "12",
+  },
+  {
+    name: "اپال",
+    id: "opal",
+    warehouseCode: "13",
+  },
+  {
+    name: "آکادا سنتر",
+    id: "akada",
+    warehouseCode: "14",
+  },
+];
+
+export default async function Home({ searchParams }: any) {
+  // const searchParams = request.nextUrl.searchParams;
+  // const query = searchParams.get('query');
+
+  // console.log(searchParams.barcode);
+
+  let data:any = await getHesabfaProducts(searchParams.barcode);
+  let codesList = [];
+  for (let i of data.data.Result.List) {
+    codesList.push(i.Code);
+  }
+  // console.log("data: ", codesList);
+
+  const allQuantity = await getHesabfaQuantity(codesList);
+  // console.log("allQuantity: ", allQuantity.Result);
+  // console.log(allQuantity.Result[0].Warehouse);
+  // console.log("check error: ", );
+  
+  const cleanedQuantity = quantityCleaner(allQuantity.Result)
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <>
+      {searchParams.barcode ? (
+        <HomePage branches={branches} dummyCounts={dummyCounts} searchParams={searchParams} name={data.data.Result.List[0].Name} cleanedQuantity={cleanedQuantity} />
+      ) : (
+        <div className="w-full flex flex-col justify-center items-center " >
+          <Image
+          className=" w-32 aspect-[3/1] object-contain "
+          src={logo}
+          alt="logo"
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <p className=" font-vazir text-lg mt-10 " >صفحه یافت نشد</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      )}
+    </>
   );
 }
