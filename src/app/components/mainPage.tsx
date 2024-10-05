@@ -9,20 +9,32 @@ const HomePage = ({branches, dummyCounts, searchParams, name, cleanedQuantity}:a
 
     const [selectedBranch, setSelectedBranch] = useState("")
     const [showingCounts, setShowingCounts] = useState([])
+    const [availableInSelectedBranch, setAvailableInSelectedBranch] = useState(true)
 
     useEffect(()=>{
-        setSelectedBranch(searchParams.branch)
-        console.log(cleanedQuantity);
+      console.log(cleanedQuantity);
+      
+      const branchListCode = branches.map((item:any) => item.warehouseCode)
+      if(branchListCode.includes(searchParams.branch)){
+          setSelectedBranch(searchParams.branch)
+        }else{
+          setSelectedBranch("11")
+        }
         
     },[])
 
     useEffect(()=>{
+        console.log("selectedBranch: ",selectedBranch);
+        console.log("cleanedQuantity: ",cleanedQuantity);
         
         const list = cleanedQuantity.find((e:any) => String(e.warehouse) === selectedBranch )
         console.log(list);
         
         if(list){
+          setAvailableInSelectedBranch(true)
             setShowingCounts(list.list)
+        }else{
+          setAvailableInSelectedBranch(false)
         }
         
     },[selectedBranch])
@@ -63,6 +75,7 @@ const HomePage = ({branches, dummyCounts, searchParams, name, cleanedQuantity}:a
           </div>
         </div>
         <div className=" w-11/12 px-5 py-3 border rounded-xl  ">
+        {availableInSelectedBranch ? 
           <table className="table-auto w-full border-spacing-6 ">
             <thead className=" border-b ">
               <tr>
@@ -74,7 +87,7 @@ const HomePage = ({branches, dummyCounts, searchParams, name, cleanedQuantity}:a
               {Object.keys(showingCounts).map((item:any, index:number) => {
                 return (
                   <tr
-                    key={item.size}
+                    key={item}
                     className={`text-center h-12 ${
                       index < Object.keys(showingCounts).length - 1 && "border-b border-dashed"
                     } `}
@@ -98,6 +111,9 @@ const HomePage = ({branches, dummyCounts, searchParams, name, cleanedQuantity}:a
               </tr> */}
             </tbody>
           </table>
+        :
+        <p className=" text-center " >این مدل در این شعبه موجود نمی باشد</p>  
+        }
         </div>
       </div>
     </div>

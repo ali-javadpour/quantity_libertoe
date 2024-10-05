@@ -65,21 +65,21 @@ const branches = [
     id: "heravi",
     warehouseCode: "11",
   },
-  {
-    name: "پالادیوم",
-    id: "paladium",
-    warehouseCode: "12",
-  },
-  {
-    name: "اپال",
-    id: "opal",
-    warehouseCode: "13",
-  },
-  {
-    name: "آکادا سنتر",
-    id: "akada",
-    warehouseCode: "14",
-  },
+  // {
+  //   name: "پالادیوم",
+  //   id: "paladium",
+  //   warehouseCode: "12",
+  // },
+  // {
+  //   name: "اپال",
+  //   id: "opal",
+  //   warehouseCode: "13",
+  // },
+  // {
+  //   name: "آکادا سنتر",
+  //   id: "akada",
+  //   warehouseCode: "14",
+  // },
 ];
 
 export default async function Home({ searchParams }: any) {
@@ -88,10 +88,16 @@ export default async function Home({ searchParams }: any) {
 
   // console.log(searchParams.barcode);
 
-  let data:any = await getHesabfaProducts(searchParams.barcode);
+  let hasError = false
+
+  let data: any = await getHesabfaProducts(searchParams.barcode);
   let codesList = [];
-  for (let i of data.data.Result.List) {
-    codesList.push(i.Code);
+  if (data.status === 200 && data.data.Result.FilteredCount > 0) {
+    for (let i of data.data.Result.List) {
+      codesList.push(i.Code);
+    }
+  }else{
+    hasError = true
   }
   // console.log("data: ", codesList);
 
@@ -99,21 +105,27 @@ export default async function Home({ searchParams }: any) {
   // console.log("allQuantity: ", allQuantity.Result);
   // console.log(allQuantity.Result[0].Warehouse);
   // console.log("check error: ", );
-  
-  const cleanedQuantity = quantityCleaner(allQuantity.Result)
+
+  const cleanedQuantity = quantityCleaner(allQuantity.Result);
 
   return (
     <>
-      {searchParams.barcode ? (
-        <HomePage branches={branches} dummyCounts={dummyCounts} searchParams={searchParams} name={data.data.Result.List[0].Name} cleanedQuantity={cleanedQuantity} />
-      ) : (
-        <div className="w-full flex flex-col justify-center items-center " >
-          <Image
-          className=" w-32 aspect-[3/1] object-contain "
-          src={logo}
-          alt="logo"
+      {searchParams.barcode && searchParams.barcode.length === 9 && !hasError ? (
+        <HomePage
+          branches={branches}
+          dummyCounts={dummyCounts}
+          searchParams={searchParams}
+          name={data.data.Result.List[0].Name}
+          cleanedQuantity={cleanedQuantity}
         />
-        <p className=" font-vazir text-lg mt-10 " >صفحه یافت نشد</p>
+      ) : (
+        <div className="w-full flex flex-col justify-center items-center ">
+          <Image
+            className=" w-32 aspect-[3/1] object-contain "
+            src={logo}
+            alt="logo"
+          />
+          <p className=" font-vazir text-lg mt-10 ">صفحه یافت نشد</p>
         </div>
       )}
     </>
